@@ -1,6 +1,6 @@
 {
   "name": "vtex-masterdata",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Helpers to manipulate data from Vtex Masterdata",
   "scripts": {
     "dev": "gulp --colors && gulp watch --colors",
