@@ -1,5 +1,5 @@
 // VtexMasterdata.js
-// version: 0.0.3
+// version: 0.1.0
 // author: Wellington Barreto
 // license: MIT
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
@@ -15,21 +15,22 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+/**
+ * Vtex Error
+ * @example
+ *     vtexMasterdata.getUser('email@email.com', ['isNewsletterOptIn']).done((res) => {
+ *         // success
+ *     }).fail((err) => {
+ *         // error
+ *         console.log(err.getResponse());
+ *         console.log(err.getMessage());
+ *     });
+ */
 var VtexError = function () {
-    /**
-     * Vtex Error
-     * @example
-     *     vtexMasterdata.getUser('email@email.com', ['isNewsletterOptIn']).done((res) => {
-     *         // success
-     *     }).fail((err) => {
-     *         // error
-     *         console.log(err.getResponse());
-     *         console.log(err.getMessage());
-     *     });
-     */
     function VtexError(error) {
         _classCallCheck(this, VtexError);
 
+        this.name = 'VtexMasterdata Error';
         this.response = null;
         this.message = null;
 
@@ -125,35 +126,42 @@ var VtexMasterdata = function () {
     /**
      * Create a new VtexMasterdata
      */
-    function VtexMasterdata(storeName) {
+    function VtexMasterdata() {
         _classCallCheck(this, VtexMasterdata);
 
-        this.storeName = storeName;
-        this.validate();
-        this.init();
+        this.storeName = null;
+        this._validate();
+
+        this.vtexHelpers = new VtexHelpers();
     }
 
     _createClass(VtexMasterdata, [{
-        key: 'validate',
-        value: function validate() {
+        key: '_validate',
+        value: function _validate() {
             // Validate VtexHelpers
             if (typeof window.VtexHelpers === 'undefined') {
                 throw new Error('VtexHelpers is required. Download it from https://www.npmjs.com/package/vtex-helpers');
             }
-
-            if (this.storeName === null) {
-                throw new Error('storeName is not set. Instantiate class with store name');
-            }
-        }
-    }, {
-        key: 'init',
-        value: function init() {
-            this.vtexHelpers = new VtexHelpers();
         }
 
         //------------------------------------------------------------
         //  PUBLIC METHODS
         //------------------------------------------------------------
+
+        /**
+         * Set the current Store
+         * @param {string} store - The current store
+         */
+
+    }, {
+        key: 'setStore',
+        value: function setStore(store) {
+            if (typeof store !== 'string' || store.length === 0) {
+                throw new Error('Store name must be a string and not empty.');
+            }
+
+            this.storeName = store;
+        }
 
         /**
          * Newsletter opt-in / opt-out
@@ -226,13 +234,13 @@ var VtexMasterdata = function () {
 
             return $.Deferred(function (def) {
                 if (!_helpers2.default.isEmail(email)) {
-                    return def.this(_this2._parseError(_constants2.default.error.ERR_INVALID_EMAIL));
+                    return def.reject(_this2._parseError(_constants2.default.error.ERR_INVALID_EMAIL));
                 }
 
                 _this2._getByEmail(email, entity).done(function (result) {
                     if (_this2._resultOk(result)) {
-                        return _this2._get(result[0].id, fields, entity).done(function (result) {
-                            def.resolve(_this2._parseResult(result, _constants2.default.operations.OP_GET));
+                        return _this2._get(result[0].id, fields, entity).done(function (result, textStatus, xhr) {
+                            def.resolve(_this2._parseResult(_this2._parseResponse(null, result, xhr.status), _constants2.default.operations.OP_GET));
                         }).fail(function (error) {
                             def.reject(_this2._parseResult(error));
                         });
@@ -266,7 +274,7 @@ var VtexMasterdata = function () {
 
             return $.Deferred(function (def) {
                 if (!_helpers2.default.isEmail(email)) {
-                    return def.this(_this3._parseError(_constants2.default.error.ERR_INVALID_EMAIL));
+                    return def.reject(_this3._parseError(_constants2.default.error.ERR_INVALID_EMAIL));
                 }
 
                 return _this3._getByEmail(email, entity).done(function (result) {
@@ -308,7 +316,7 @@ var VtexMasterdata = function () {
 
             return $.Deferred(function (def) {
                 if (!_helpers2.default.isEmail(email)) {
-                    return def.this(_this4._parseError(_constants2.default.error.ERR_INVALID_EMAIL));
+                    return def.reject(_this4._parseError(_constants2.default.error.ERR_INVALID_EMAIL));
                 }
 
                 return _this4._getByEmail(email, entity).done(function (result) {
@@ -369,7 +377,7 @@ var VtexMasterdata = function () {
 
             return $.Deferred(function (def) {
                 return _this6._partialUpdate(id, data, entity).done(function (result) {
-                    def.resolve(_this6._parseResult(result));
+                    def.resolve(_this6._parseResult(result, result.statusCode === 201 ? _constants2.default.operations.OP_INSERT : _constants2.default.operations.OP_UPDATE));
                 }).fail(function (error) {
                     def.reject(_this6._parseError(error));
                 });
@@ -392,8 +400,8 @@ var VtexMasterdata = function () {
             var _this7 = this;
 
             return $.Deferred(function (def) {
-                return _this7._search(params, fields, entity, limit, offset).done(function (result) {
-                    def.resolve(_this7._parseResult(result, _constants2.default.operations.OP_GET));
+                return _this7._search(params, fields, entity, limit, offset).done(function (result, textStatus, xhr) {
+                    def.resolve(_this7._parseResult(_this7._parseResponse(null, result, xhr.status), _constants2.default.operations.OP_GET));
                 }).fail(function (error) {
                     def.reject(_this7._parseError(error));
                 });
@@ -414,8 +422,8 @@ var VtexMasterdata = function () {
             var _this8 = this;
 
             return $.Deferred(function (def) {
-                return _this8._get(id, fields, entity).done(function (result) {
-                    def.resolve(_this8._parseResult(result, _constants2.default.operations.OP_GET));
+                return _this8._get(id, fields, entity).done(function (result, textStatus, xhr) {
+                    def.resolve(_this8._parseResult(_this8._parseResponse(fields, result, xhr.status), _constants2.default.operations.OP_GET));
                 }).fail(function (error) {
                     def.reject(_this8._parseError(error));
                 });
@@ -437,8 +445,9 @@ var VtexMasterdata = function () {
             return $.Deferred(function (def) {
                 return _this9._call('get', id, {
                     _fields: 'id'
-                }, entity, _constants2.default.types.DOCUMENTS).done(function (result) {
+                }, entity, _constants2.default.types.DOCUMENTS).done(function (result, textStatus, xhr) {
                     if (result !== undefined && result.id !== undefined) {
+                        def.resolve(_this9._parseResult(_this9._parseResponse(null, { id: result.id, exists: true }, xhr.status), _constants2.default.operations.OP_GET));
                         def.resolve(_this9._parseResult(result, _constants2.default.operations.OP_GET));
                     } else def.reject(false);
                 }).fail(function (error) {
@@ -469,8 +478,8 @@ var VtexMasterdata = function () {
             var _this10 = this;
 
             return $.Deferred(function (def) {
-                return _this10._uploadAttachment(id, entity, field, file).done(function (result) {
-                    def.resolve(_this10._parseResult(result, _constants2.default.operations.OP_INSERT));
+                return _this10._uploadAttachment(id, entity, field, file).done(function (result, textStatus, xhr) {
+                    def.resolve(_this10._parseResult(_this10._parseResponse({ DocummentId: id, filename: file.name }, result, xhr.status), _constants2.default.operations.OP_INSERT));
                 }).fail(function (error) {
                     def.reject(_this10._parseError(error));
                 });
@@ -514,8 +523,8 @@ var VtexMasterdata = function () {
             var _this11 = this;
 
             return $.Deferred(function (def) {
-                return _this11._call('post', null, data, entity, _constants2.default.types.DOCUMENTS).done(function (result) {
-                    def.resolve($.extend(data, result));
+                return _this11._call('post', null, data, entity, _constants2.default.types.DOCUMENTS).done(function (result, textStatus, xhr) {
+                    def.resolve(_this11._parseResponse(data, result, xhr.status));
                 }).fail(function (error) {
                     def.reject(error);
                 });
@@ -535,8 +544,8 @@ var VtexMasterdata = function () {
             var _this12 = this;
 
             return $.Deferred(function (def) {
-                return _this12._call('post', null, data, entity, _constants2.default.types.DOCUMENTS).done(function (result) {
-                    def.resolve($.extend(data, result));
+                return _this12._call('post', null, data, entity, _constants2.default.types.DOCUMENTS).done(function (result, textStatus, xhr) {
+                    def.resolve(_this12._parseResponse(null, result, xhr.status));
                 }).fail(function (error) {
                     def.reject(error);
                 });
@@ -590,8 +599,8 @@ var VtexMasterdata = function () {
             var _this13 = this;
 
             return $.Deferred(function (def) {
-                return _this13._call('patch', id, data, entity, _constants2.default.types.DOCUMENTS).done(function (result) {
-                    def.resolve(data);
+                return _this13._call('patch', id, data, entity, _constants2.default.types.DOCUMENTS).done(function (result, textStatus, xhr) {
+                    def.resolve(_this13._parseResponse(data, result, xhr.status));
                 }).fail(function (error) {
                     def.reject(error);
                 });
@@ -642,6 +651,10 @@ var VtexMasterdata = function () {
         value: function _getURL(entity, type, id) {
             entity = entity !== undefined ? entity : _constants2.default.DEFAULT_ENTITY;
 
+            if (this.storeName === null) {
+                throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
+            }
+
             return _helpers2.default.strReplace(['{storeName}', '{entity}', '{type}'], [this.storeName, entity, type], _constants2.default.API_URL) + (id !== undefined && id !== null ? id : '');
         }
     }, {
@@ -649,7 +662,11 @@ var VtexMasterdata = function () {
         value: function _getAttachmentURL(entity, id, field) {
             entity = entity !== undefined ? entity : _constants2.default.DEFAULT_ENTITY;
 
-            return _helpers2.default.strReplace(['{storeName}', '{entity}', '{field}'], [this.storeName, entity, field], _constants2.default.API_ATTACHMENT_URL) + (id !== undefined && id !== null ? id : '');
+            if (this.storeName === null) {
+                throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
+            }
+
+            return _helpers2.default.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this.storeName, entity, id !== undefined && id !== null ? id : '', field], _constants2.default.API_ATTACHMENT_URL);
         }
     }, {
         key: '_call',
@@ -682,6 +699,17 @@ var VtexMasterdata = function () {
                 accept: 'application/vnd.vtex.ds.v10+json',
                 mimeType: 'multipart/form-data'
             });
+        }
+    }, {
+        key: '_parseResponse',
+        value: function _parseResponse(data, result, status) {
+            var obj = {
+                dataInsert: data,
+                dataResponse: result,
+                dataStatus: status
+            };
+
+            return obj;
         }
 
         /**
@@ -743,23 +771,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+/**
+ * Vtex Success
+ * @example
+ *     vtexMasterdata.newsletter('email@email.com').done((res) => {
+ *         // Get the response results, whatever it might be [array, object, string, integer]
+ *         const results = response.getResults();
+ *         if ( res.isUpdate() ) {
+ *             window.console.log('User updated!');
+ *         } else if ( res.isInsert() ) {
+ *             window.console.log('New user!');
+ *         }
+ *     });
+ */
 var VtexSuccess = function () {
-    /**
-     * Vtex Success
-     * @example
-     *     vtexMasterdata.newsletter('email@email.com').done((res) => {
-     *         // Get the response results, whatever it might be [array, object, string, integer]
-     *         const results = response.getResults();
-     *         if ( res.isUpdate() ) {
-     *             window.console.log('User updated!');
-     *         } else if ( res.isInsert() ) {
-     *             window.console.log('New user!');
-     *         }
-     *     });
-     */
     function VtexSuccess(result, operation) {
         _classCallCheck(this, VtexSuccess);
 
+        this.name = 'VtexMasterdata Success';
         this.result = result;
         this.operation = operation;
     }
@@ -818,6 +847,28 @@ var VtexSuccess = function () {
         key: 'getResults',
         value: function getResults() {
             return this.result;
+        }
+
+        /**
+         * Returns the request response
+         * @returns {mixed}
+         */
+
+    }, {
+        key: 'getResponse',
+        value: function getResponse() {
+            return this.result.dataResponse;
+        }
+
+        /**
+         * Returns the status code
+         * @returns {mixed}
+         */
+
+    }, {
+        key: 'getStatus',
+        value: function getStatus() {
+            return this.result.dataStatus;
         }
     }]);
 

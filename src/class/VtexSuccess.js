@@ -1,21 +1,22 @@
 
 import Constants from './../data/constants.js';
 
+/**
+ * Vtex Success
+ * @example
+ *     vtexMasterdata.newsletter('email@email.com').done((res) => {
+ *         // Get the response results, whatever it might be [array, object, string, integer]
+ *         const results = response.getResults();
+ *         if ( res.isUpdate() ) {
+ *             window.console.log('User updated!');
+ *         } else if ( res.isInsert() ) {
+ *             window.console.log('New user!');
+ *         }
+ *     });
+ */
 class VtexSuccess {
-    /**
-     * Vtex Success
-     * @example
-     *     vtexMasterdata.newsletter('email@email.com').done((res) => {
-     *         // Get the response results, whatever it might be [array, object, string, integer]
-     *         const results = response.getResults();
-     *         if ( res.isUpdate() ) {
-     *             window.console.log('User updated!');
-     *         } else if ( res.isInsert() ) {
-     *             window.console.log('New user!');
-     *         }
-     *     });
-     */
     constructor(result, operation) {
+        this.name = 'VtexMasterdata Success';
         this.result = result;
         this.operation = operation;
     }
@@ -58,6 +59,22 @@ class VtexSuccess {
      */
     getResults() {
         return this.result;
+    }
+
+    /**
+     * Returns the request response
+     * @returns {mixed}
+     */
+    getResponse() {
+        return this.result.dataResponse;
+    }
+
+    /**
+     * Returns the status code
+     * @returns {mixed}
+     */
+    getStatus() {
+        return this.result.dataStatus;
     }
 }
 

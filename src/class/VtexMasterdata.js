@@ -9,30 +9,35 @@ class VtexMasterdata {
     /**
      * Create a new VtexMasterdata
      */
-    constructor(storeName) {
-        this.storeName = storeName;
-        this.validate();
-        this.init();
+    constructor() {
+        this.storeName = null;
+        this._validate();
+
+        this.vtexHelpers = new VtexHelpers();
     }
 
-    validate() {
+    _validate() {
         // Validate VtexHelpers
         if ( typeof (window.VtexHelpers) === 'undefined' ) {
             throw new Error('VtexHelpers is required. Download it from https://www.npmjs.com/package/vtex-helpers');
         }
-
-        if ( this.storeName === null ) {
-            throw new Error('storeName is not set. Instantiate class with store name');
-        }
-    }
-
-    init() {
-        this.vtexHelpers = new VtexHelpers();
     }
 
     //------------------------------------------------------------
     //  PUBLIC METHODS
     //------------------------------------------------------------
+
+    /**
+     * Set the current Store
+     * @param {string} store - The current store
+     */
+    setStore(store) {
+        if ( typeof store !== 'string' || store.length === 0 ) {
+            throw new Error('Store name must be a string and not empty.');
+        }
+
+        this.storeName = store;
+    }
 
     /**
      * Newsletter opt-in / opt-out
@@ -95,13 +100,13 @@ class VtexMasterdata {
     getUser(email, fields, entity) {
         return $.Deferred((def) => {
             if ( ! Helpers.isEmail(email) ) {
-                return def.this(this._parseError(Constants.error.ERR_INVALID_EMAIL));
+                return def.reject(this._parseError(Constants.error.ERR_INVALID_EMAIL));
             }
 
             this._getByEmail(email, entity).done((result) => {
                 if ( this._resultOk(result) ) {
-                    return this._get(result[0].id, fields, entity).done((result) => {
-                        def.resolve(this._parseResult(result, Constants.operations.OP_GET));
+                    return this._get(result[0].id, fields, entity).done((result, textStatus, xhr) => {
+                        def.resolve(this._parseResult(this._parseResponse(null, result, xhr.status), Constants.operations.OP_GET));
                     }).fail((error) => {
                         def.reject(this._parseResult(error));
                     });
@@ -130,7 +135,7 @@ class VtexMasterdata {
     updateUser(email, data, entity) {
         return $.Deferred((def) => {
             if ( ! Helpers.isEmail(email) ) {
-                return def.this(this._parseError(Constants.error.ERR_INVALID_EMAIL));
+                return def.reject(this._parseError(Constants.error.ERR_INVALID_EMAIL));
             }
 
             return this._getByEmail(email, entity).done((result) => {
@@ -167,7 +172,7 @@ class VtexMasterdata {
     insertUpdateUser(email, data, entity) {
         return $.Deferred((def) => {
             if ( ! Helpers.isEmail(email) ) {
-                return def.this(this._parseError(Constants.error.ERR_INVALID_EMAIL));
+                return def.reject(this._parseError(Constants.error.ERR_INVALID_EMAIL));
             }
 
             return this._getByEmail(email, entity).done((result) => {
@@ -218,7 +223,7 @@ class VtexMasterdata {
     insertUpdate(id, data, entity) {
         return $.Deferred((def) => {
             return this._partialUpdate(id, data, entity).done((result) => {
-                def.resolve(this._parseResult(result));
+                def.resolve(this._parseResult(result, (result.statusCode === 201) ? Constants.operations.OP_INSERT : Constants.operations.OP_UPDATE ));
             }).fail((error) => {
                 def.reject(this._parseError(error));
             });
@@ -236,8 +241,8 @@ class VtexMasterdata {
      */
     search(params, fields, entity, limit, offset) {
         return $.Deferred((def) => {
-            return this._search(params, fields, entity, limit, offset).done((result) => {
-                def.resolve(this._parseResult(result, Constants.operations.OP_GET));
+            return this._search(params, fields, entity, limit, offset).done((result, textStatus, xhr) => {
+                def.resolve(this._parseResult(this._parseResponse(null, result, xhr.status), Constants.operations.OP_GET));
             }).fail((error) => {
                 def.reject(this._parseError(error));
             });
@@ -253,8 +258,8 @@ class VtexMasterdata {
      */
     get(id, fields, entity) {
         return $.Deferred((def) => {
-            return this._get(id, fields, entity).done((result) => {
-                def.resolve(this._parseResult(result, Constants.operations.OP_GET));
+            return this._get(id, fields, entity).done((result, textStatus, xhr) => {
+                def.resolve(this._parseResult(this._parseResponse(fields, result, xhr.status), Constants.operations.OP_GET));
             }).fail((error) => {
                 def.reject(this._parseError(error));
             });
@@ -271,8 +276,9 @@ class VtexMasterdata {
         return $.Deferred((def) => {
             return this._call('get', id, {
                 _fields: 'id'
-            }, entity, Constants.types.DOCUMENTS).done((result) => {
+            }, entity, Constants.types.DOCUMENTS).done((result, textStatus, xhr) => {
                 if ( result !== undefined && result.id !== undefined ) {
+                    def.resolve(this._parseResult(this._parseResponse(null, {id: result.id, exists: true}, xhr.status), Constants.operations.OP_GET));
                     def.resolve(this._parseResult(result, Constants.operations.OP_GET));
                 } else def.reject(false);
             }).fail((error) => {
@@ -298,8 +304,8 @@ class VtexMasterdata {
      */
     uploadFile(id, entity, field, file) {
         return $.Deferred((def) => {
-            return this._uploadAttachment(id, entity, field, file).done((result) => {
-                def.resolve(this._parseResult(result, Constants.operations.OP_INSERT));
+            return this._uploadAttachment(id, entity, field, file).done((result, textStatus, xhr) => {
+                def.resolve(this._parseResult(this._parseResponse({DocummentId: id, filename: file.name}, result, xhr.status), Constants.operations.OP_INSERT));
             }).fail((error) => {
                 def.reject(this._parseError(error));
             });
@@ -335,8 +341,8 @@ class VtexMasterdata {
      */
     _insert(data, entity) {
         return $.Deferred((def) => {
-            return this._call('post', null, data, entity, Constants.types.DOCUMENTS).done((result) => {
-                def.resolve($.extend(data, result));
+            return this._call('post', null, data, entity, Constants.types.DOCUMENTS).done((result, textStatus, xhr) => {
+                def.resolve(this._parseResponse(data, result, xhr.status));
             }).fail((error) => {
                 def.reject(error);
             });
@@ -351,8 +357,8 @@ class VtexMasterdata {
      */
     _upload(data, entity) {
         return $.Deferred((def) => {
-            return this._call('post', null, data, entity, Constants.types.DOCUMENTS).done((result) => {
-                def.resolve($.extend(data, result));
+            return this._call('post', null, data, entity, Constants.types.DOCUMENTS).done((result, textStatus, xhr) => {
+                def.resolve(this._parseResponse(null, result, xhr.status));
             }).fail((error) => {
                 def.reject(error);
             });
@@ -395,8 +401,8 @@ class VtexMasterdata {
      */
     _partialUpdate(id, data, entity) {
         return $.Deferred((def) => {
-            return this._call('patch', id, data, entity, Constants.types.DOCUMENTS).done((result) => {
-                def.resolve(data);
+            return this._call('patch', id, data, entity, Constants.types.DOCUMENTS).done((result, textStatus, xhr) => {
+                def.resolve(this._parseResponse(data, result, xhr.status));
             }).fail((error) => {
                 def.reject(error);
             });
@@ -440,13 +446,21 @@ class VtexMasterdata {
     _getURL(entity, type, id) {
         entity = entity !== undefined ? entity : Constants.DEFAULT_ENTITY;
 
+        if ( this.storeName === null ) {
+            throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
+        }
+
         return Helpers.strReplace(['{storeName}', '{entity}', '{type}'], [this.storeName, entity, type], Constants.API_URL) + (id !== undefined && id !== null ? id : '');
     }
 
     _getAttachmentURL(entity, id, field) {
         entity = entity !== undefined ? entity : Constants.DEFAULT_ENTITY;
 
-        return Helpers.strReplace(['{storeName}', '{entity}', '{field}'], [this.storeName, entity, field], Constants.API_ATTACHMENT_URL) + (id !== undefined && id !== null ? id : '');
+        if ( this.storeName === null ) {
+            throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
+        }
+
+        return Helpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this.storeName, entity, (id !== undefined && id !== null ? id : ''), field], Constants.API_ATTACHMENT_URL);
     }
 
     _call(method, id, data, entity, type, headers) {
@@ -476,6 +490,16 @@ class VtexMasterdata {
             accept: 'application/vnd.vtex.ds.v10+json',
             mimeType: 'multipart/form-data'
         });
+    }
+
+    _parseResponse(data, result, status) {
+        const obj = {
+            dataInsert: data,
+            dataResponse: result,
+            dataStatus: status,
+        };
+
+        return obj;
     }
 
     /**

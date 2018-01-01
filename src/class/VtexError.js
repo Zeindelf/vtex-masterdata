@@ -1,17 +1,18 @@
 
+/**
+ * Vtex Error
+ * @example
+ *     vtexMasterdata.getUser('email@email.com', ['isNewsletterOptIn']).done((res) => {
+ *         // success
+ *     }).fail((err) => {
+ *         // error
+ *         console.log(err.getResponse());
+ *         console.log(err.getMessage());
+ *     });
+ */
 class VtexError {
-    /**
-     * Vtex Error
-     * @example
-     *     vtexMasterdata.getUser('email@email.com', ['isNewsletterOptIn']).done((res) => {
-     *         // success
-     *     }).fail((err) => {
-     *         // error
-     *         console.log(err.getResponse());
-     *         console.log(err.getMessage());
-     *     });
-     */
     constructor(error) {
+        this.name = 'VtexMasterdata Error';
         this.response = null;
         this.message = null;
 
