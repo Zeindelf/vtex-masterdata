@@ -19,10 +19,10 @@ module.exports = function(ARGS, SRC, DIST) {
             .transform(babelify).bundle()
             .pipe(source('index.js'))
             .pipe(plumber({errorHandler: notify.onError("Error: <%= error.message %>")}))
-            .pipe(rename('vtex-minicart.js'))
+            .pipe(rename('vtex-masterdata.js'))
             .pipe(gulpIf(ARGS.production, buffer()))
             .pipe(gulpIf(ARGS.production, uglify()))
-            .pipe(gulpIf(ARGS.production, rename('vtex-minicart.min.js')))
+            .pipe(gulpIf(ARGS.production, rename('vtex-masterdata.min.js')))
             .pipe(notify({
                 title: "Scripts Merged!",
                 message: "Generate file: <%= file.relative %>!"
@@ -34,7 +34,7 @@ module.exports = function(ARGS, SRC, DIST) {
      * Scripts Watch
      */
     gulp.task('watchScripts', () => {
-        return gulp.watch(`${SRC}/*.js`, ['scripts'])
+        return gulp.watch(`${SRC}/**/*.js`, ['scripts'])
             .on('change', (ev) => {
                 console.log(`File ${ev.path} was ${ev.type}, running tasks...`);
             });
