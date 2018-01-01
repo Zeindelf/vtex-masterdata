@@ -446,7 +446,7 @@ class VtexMasterdata {
     _getAttachmentURL(entity, id, field) {
         entity = entity !== undefined ? entity : Constants.DEFAULT_ENTITY;
 
-        return Helpers.strReplace(['{storeName}', '{entity}', '{field}'], [storeName, entity, field], Constants.API_ATTACHMENT_URL) + (id !== undefined && id !== null ? id : '');
+        return Helpers.strReplace(['{storeName}', '{entity}', '{field}'], [this.storeName, entity, field], Constants.API_ATTACHMENT_URL) + (id !== undefined && id !== null ? id : '');
     }
 
     _call(method, id, data, entity, type, headers) {
