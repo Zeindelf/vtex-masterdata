@@ -1,6 +1,6 @@
 
 /**
- * Vtex Error
+ * CustomError
  * @example
  *     vtexMasterdata.getUser('email@email.com', ['isNewsletterOptIn']).done((res) => {
  *         // success
@@ -10,9 +10,9 @@
  *         console.log(err.getMessage());
  *     });
  */
-class VtexError {
+class CustomError {
     constructor(error) {
-        this.name = 'VtexMasterdata Error';
+        this.type = 'Error';
         this.response = null;
         this.message = null;
 
@@ -60,4 +60,4 @@ class VtexError {
     }
 }
 
-export default VtexError;
+export default CustomError;

@@ -1,12 +1,25 @@
 # VtexMasterdata.js
+
 Helpers to manipulate data from Vtex Masterdata
+
+## Table of contents
+
+- [Main](#main)
+- [Getting started](#getting-started)
+- [Methods](#methods)
+- [License](#license)
+- [Dependencies](#dependencies)
+- [Todo](#todo)
 
 ## Main
 
 ```text
 dist/
-├── vtex-masterdata.js          (uncompressed)
-└── vtex-masterdata.min.js      (compressed with Rivets.js)
+dist/
+├── vtex-masterdata.js        (UMD)
+├── vtex-masterdata.min.js    (UMD, compressed)
+├── vtex-masterdata.common.js (CommonJS, default)
+└── vtex-masterdata.esm.js    (ES Module)
 ```
 
 ## Getting started
@@ -27,6 +40,8 @@ Include files:
 ```
 
 ### Usage
+
+The package is available on `VTEX` namespace.
 
 ```js
 // Instantiate class

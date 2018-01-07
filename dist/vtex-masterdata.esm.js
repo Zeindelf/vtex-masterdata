@@ -9,12 +9,6 @@
  * Date: 2018-01-07T23:14:58.742Z
  */
 
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.VTEX = global.VTEX || {}, global.VTEX.VtexMasterdata = factory());
-}(this, (function () { 'use strict';
-
 var CONSTANTS = {
     API_URL: '\/\/api.vtexcrm.com.br/{storeName}/dataentities/{entity}/{type}/',
     API_ATTACHMENT_URL: '\/\/api.vtexcrm.com.br/{storeName}/dataentities/{entity}/documents/{id}/{field}/attachments',
@@ -922,6 +916,4 @@ var VtexMasterdata = function VtexMasterdata(vtexUtils) {
   this.globalHelpers.extend(VtexMasterdata.prototype, Methods);
 };
 
-return VtexMasterdata;
-
-})));
+export default VtexMasterdata;

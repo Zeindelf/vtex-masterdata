@@ -13,7 +13,7 @@ export default {
         SEARCH: 'search',
         SCHEMAS: 'schemas',
         FACET: 'search/facet',
-        ATTACHMENT: 'documents'
+        ATTACHMENT: 'documents',
     },
     operations: {
         OP_GET: 'get',

@@ -2,45 +2,63 @@
   "name": "vtex-masterdata",
   "version": "0.1.0",
   "description": "Helpers to manipulate data from Vtex Masterdata",
+  "main": "dist/vtex-masterdata.common.js",
+  "module": "dist/vtex-masterdata.esm.js",
+  "browser": "dist/vtex-masterdata.js",
   "scripts": {
-    "dev": "gulp --colors && gulp watch --colors",
-    "build": "gulp --colors --production",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup -c",
+    "clear": "del-cli dist",
+    "compress": "uglifyjs dist/vtex-masterdata.js -o dist/vtex-masterdata.min.js -c -m --comments /^!!/",
+    "lint": "eslint src --fix",
+    "release": "npm run clear && npm run lint && npm run build && npm run compress",
+    "start": "npm-run-all --parallel watch:*",
+    "watch:js": "rollup -c -m -w"
   },
-  "main": "dist/vtex-masterdata.min.js",
-  "repository": {
-      "type": "git",
-      "url": "https://github.com/zeindelf/vtex-masterdata"
-  },
-  "keywords": [
-      "vtex",
-      "data",
-      "masterdata"
-  ],
-  "author": {
-      "name": "Wellington Barreto",
-      "email": "zeindelf@hotmail.com",
-      "homepage": "https://www.zeindelf.com"
-  },
+  "repository": "zeindelf/vtex-masterdata",
+  "homepage": "https://github.com/zeindelf/vtex-masterdata",
   "license": "MIT",
+  "author": {
+    "name": "Zeindelf",
+    "email": "zeindelf@hotmail.com",
+    "homepage": "https://www.zeindelf.com"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "keywords": [
+    "vtex",
+    "utils",
+    "utilities",
+    "helpers",
+    "data",
+    "masterdata",
+    "vtex-masterdata",
+    "vtex-masterdata.js",
+    "vtex-utils",
+    "javascript",
+    "js-helpers",
+    "js-utilities",
+    "js-utils",
+    "front-end",
+    "web",
+    "component",
+    "development"
+  ],
   "devDependencies": {
-    "babel-cli": "^6.14.0",
-    "babel-preset-es2015": "^6.14.0",
-    "babelify": "^7.3.0",
-    "browserify": "^13.1.0",
-    "glob": "^7.0.6",
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.0",
-    "gulp-if": "^2.0.1",
-    "gulp-notify": "^2.2.0",
-    "gulp-plumber": "^1.1.0",
-    "gulp-pug": "^3.0.4",
-    "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^2.0.0",
-    "merge-stream": "^1.0.0",
-    "run-sequence": "^1.2.2",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0",
-    "yargs": "^5.0.0"
+    "babel": "^6.23.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.1.2",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "del-cli": "^1.1.0",
+    "eslint": "^4.13.1",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-import": "^2.8.0",
+    "npm-run-all": "^4.1.2",
+    "rollup": "^0.53.0",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-watch": "^4.3.1",
+    "uglify-js": "^3.2.2"
   }
 }

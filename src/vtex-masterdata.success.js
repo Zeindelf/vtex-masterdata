@@ -1,8 +1,8 @@
 
-import Constants from './../data/constants.js';
+import CONSTANTS from './vtex-masterdata.constants.js';
 
 /**
- * Vtex Success
+ * CustomSuccess
  * @example
  *     vtexMasterdata.newsletter('email@email.com').done((res) => {
  *         // Get the response results, whatever it might be [array, object, string, integer]
@@ -14,9 +14,9 @@ import Constants from './../data/constants.js';
  *         }
  *     });
  */
-class VtexSuccess {
+class CustomSuccess {
     constructor(result, operation) {
-        this.name = 'VtexMasterdata Success';
+        this.type = 'Success';
         this.result = result;
         this.operation = operation;
     }
@@ -34,7 +34,7 @@ class VtexSuccess {
      * @returns {boolean} Whether the operation was an insert or not
      */
     isInsert() {
-        return this.operation == Constants.operations.OP_INSERT;
+        return this.operation == CONSTANTS.operations.OP_INSERT;
     }
 
     /**
@@ -42,7 +42,7 @@ class VtexSuccess {
      * @returns {boolean} Whether the operation was an update or not
      */
     isUpdate() {
-        return this.operation == Constants.operations.OP_UPDATE;
+        return this.operation == CONSTANTS.operations.OP_UPDATE;
     }
 
     /**
@@ -50,7 +50,7 @@ class VtexSuccess {
      * @returns {boolean} Whether the operation was an update or not
      */
     isGet() {
-        return this.operation == Constants.operations.OP_GET;
+        return this.operation == CONSTANTS.operations.OP_GET;
     }
 
     /**
@@ -78,4 +78,4 @@ class VtexSuccess {
     }
 }
 
-export default VtexSuccess;
+export default CustomSuccess;
