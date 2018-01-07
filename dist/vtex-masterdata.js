@@ -1,12 +1,12 @@
 
 /*!!
- * VtexMasterdata.js v0.2.0
+ * VtexMasterdata.js v0.2.1
  * https://github.com/zeindelf/vtex-masterdata
  *
  * Copyright (c) 2017-2018 Zeindelf
  * Released under the MIT license
  *
- * Date: 2018-01-07T23:30:33.491Z
+ * Date: 2018-01-07T23:40:19.368Z
  */
 
 (function (global, factory) {
@@ -887,7 +887,7 @@ var VtexMasterdata = function VtexMasterdata(vtexUtils) {
    * Version
    * @type {String}
    */
-  this.version = '0.2.0';
+  this.version = '0.2.1';
 
   /**
    * Package name
