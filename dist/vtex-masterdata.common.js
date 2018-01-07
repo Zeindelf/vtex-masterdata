@@ -1,12 +1,12 @@
 
 /*!!
- * VtexMasterdata.js v0.1.0
+ * VtexMasterdata.js v0.2.0
  * https://github.com/zeindelf/vtex-masterdata
  *
  * Copyright (c) 2017-2018 Zeindelf
  * Released under the MIT license
  *
- * Date: 2018-01-07T23:14:58.742Z
+ * Date: 2018-01-07T23:30:33.491Z
  */
 
 'use strict';
@@ -257,8 +257,8 @@ var Private = function () {
     function Private() {
         classCallCheck(this, Private);
 
-        this.globalHelpers = null;
-        this.vtexHelpers = null;
+        this._globalHelpers = null;
+        this._vtexHelpers = null;
         this._storeName = null;
     }
 
@@ -270,8 +270,8 @@ var Private = function () {
     }, {
         key: '_setHelpers',
         value: function _setHelpers(globalHelpers, vtexHelpers) {
-            this.globalHelpers = globalHelpers;
-            this.vtexHelpers = vtexHelpers;
+            this._globalHelpers = globalHelpers;
+            this._vtexHelpers = vtexHelpers;
         }
 
         /**
@@ -286,7 +286,7 @@ var Private = function () {
         key: '_get',
         value: function _get(id, fields, entity) {
             var defaults$$1 = ['email', 'id'];
-            fields = fields instanceof Array ? this.globalHelpers.arrayUnique(fields.concat(['id'])) : defaults$$1;
+            fields = fields instanceof Array ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults$$1;
             var data = {
                 '_fields': fields.join(',')
             };
@@ -445,7 +445,7 @@ var Private = function () {
                 throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
             }
 
-            return this.globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
+            return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
         }
     }, {
         key: '_getAttachmentURL',
@@ -456,7 +456,7 @@ var Private = function () {
                 throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
             }
 
-            return this.globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, id !== undefined && id !== null ? id : '', field], CONSTANTS.API_ATTACHMENT_URL);
+            return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, id !== undefined && id !== null ? id : '', field], CONSTANTS.API_ATTACHMENT_URL);
         }
     }, {
         key: '_call',
@@ -883,7 +883,7 @@ var VtexMasterdata = function VtexMasterdata(vtexUtils) {
    * Version
    * @type {String}
    */
-  this.version = '0.1.0';
+  this.version = '0.2.0';
 
   /**
    * Package name

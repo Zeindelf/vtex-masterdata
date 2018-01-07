@@ -5,8 +5,8 @@ import CustomError from './vtex-masterdata.error.js';
 
 class Private {
     constructor() {
-        this.globalHelpers = null;
-        this.vtexHelpers = null;
+        this._globalHelpers = null;
+        this._vtexHelpers = null;
         this._storeName = null;
     }
 
@@ -15,8 +15,8 @@ class Private {
     }
 
     _setHelpers(globalHelpers, vtexHelpers) {
-        this.globalHelpers = globalHelpers;
-        this.vtexHelpers = vtexHelpers;
+        this._globalHelpers = globalHelpers;
+        this._vtexHelpers = vtexHelpers;
     }
 
     /**
@@ -28,7 +28,7 @@ class Private {
      */
     _get(id, fields, entity) {
         const defaults = ['email', 'id'];
-        fields = fields instanceof Array ? this.globalHelpers.arrayUnique(fields.concat(['id'])) : defaults;
+        fields = fields instanceof Array ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults;
         const data = {
             '_fields': fields.join(','),
         };
@@ -159,7 +159,7 @@ class Private {
             throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
         }
 
-        return this.globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
+        return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
     }
 
     _getAttachmentURL(entity, id, field) {
@@ -169,7 +169,7 @@ class Private {
             throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
         }
 
-        return this.globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, (id !== undefined && id !== null ? id : ''), field], CONSTANTS.API_ATTACHMENT_URL);
+        return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, (id !== undefined && id !== null ? id : ''), field], CONSTANTS.API_ATTACHMENT_URL);
     }
 
     _call(method, id, data, entity, type, headers) {

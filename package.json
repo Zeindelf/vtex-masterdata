@@ -1,6 +1,6 @@
 {
   "name": "vtex-masterdata",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Helpers to manipulate data from Vtex Masterdata",
   "main": "dist/vtex-masterdata.common.js",
   "module": "dist/vtex-masterdata.esm.js",
@@ -11,8 +11,7 @@
     "compress": "uglifyjs dist/vtex-masterdata.js -o dist/vtex-masterdata.min.js -c -m --comments /^!!/",
     "lint": "eslint src --fix",
     "release": "npm run clear && npm run lint && npm run build && npm run compress",
-    "start": "npm-run-all --parallel watch:*",
-    "watch:js": "rollup -c -m -w"
+    "start": "npm-run-all --parallel watch:*"
   },
   "repository": "zeindelf/vtex-masterdata",
   "homepage": "https://github.com/zeindelf/vtex-masterdata",
