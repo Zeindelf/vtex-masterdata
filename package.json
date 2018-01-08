@@ -44,7 +44,7 @@
     "component",
     "development"
   ],
-  "devDependencies": {
+  "dependencies": {
     "babel": "^6.23.0",
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.1.2",

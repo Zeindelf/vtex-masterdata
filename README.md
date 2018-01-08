@@ -15,7 +15,6 @@ Helpers to manipulate data from Vtex Masterdata
 
 ```text
 dist/
-dist/
 ├── vtex-masterdata.js        (UMD)
 ├── vtex-masterdata.min.js    (UMD, compressed)
 ├── vtex-masterdata.common.js (CommonJS, default)
@@ -24,30 +23,46 @@ dist/
 
 ## Getting started
 
-### Install
+### Direct download
+
+Download the script [here](https://github.com/Zeindelf/vtex-masterdata/blob/master/dist/vtex-masterdata.min.js) and include it.
 
 You will need [VtexUtils.js](https://github.com/zeindelf/vtex-utils)
-
-```shell
-npm install vtex-utils vtex-masterdata --save
-```
-
-Include files:
 
 ```html
 <script type="text/javascript" src="/arquivos/vtex-utils.min.js"></script>
 <script type="text/javascript" src="/arquivos/vtex-masterdata.min.js"></script>
 ```
 
-### Usage
+### Package Managers
 
-The package is available on `VTEX` namespace.
+VtexMasterdata.js supports [npm](https://www.npmjs.com/package/vtex-masterdata) under the name `vtex-masterdata`.
+
+```shell
+npm install vtex-masterdata --save
+```
+
+### Module Loaders
+
+VtexMasterdata.js can also be loaded as an CommonJS or ES6 module (recomended).
 
 ```js
-// Init VtexUtils.js
+// CommomJS
+var VtexMasterdata = require('vtex-masterdata');
+
+// ES6 module
+import VtexMasterdata from 'vtex-masterdata';
+```
+
+### Usage
+
+With UMD (Universal Module Definition), the package is available on `VTEX` namespace.
+
+```js
+// First, initialize VtexUtils.js
 var vtexUtils = new VTEX.VtexUtils();
 
-// Instantiate class
+// Initialize constructor passing VtexUtils.js as a param
 var vtexMasterdata = new VTEX.VtexMasterdata(vtexUtils);
 
 // Set store name (https://store-name.vtexcommercestable.com.br)
