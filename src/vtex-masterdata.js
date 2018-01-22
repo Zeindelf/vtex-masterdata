@@ -12,7 +12,7 @@ class VtexMasterdata {
          * Version
          * @type {String}
          */
-        this.version = '0.2.2';
+        this.version = '0.3.0';
 
         /**
          * Package name

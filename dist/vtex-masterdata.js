@@ -1,12 +1,12 @@
 
 /*!!
- * VtexMasterdata.js v0.2.2
+ * VtexMasterdata.js v0.3.0
  * https://github.com/zeindelf/vtex-masterdata
  *
  * Copyright (c) 2017-2018 Zeindelf
  * Released under the MIT license
  *
- * Date: 2018-01-21T14:16:35.349Z
+ * Date: 2018-01-22T03:01:34.036Z
  */
 
 (function (global, factory) {
@@ -85,6 +85,20 @@ var createClass = function () {
     return Constructor;
   };
 }();
+
+/**
+ * CustomSuccess
+ * @example
+ *     vtexMasterdata.newsletter('email@email.com').done((res) => {
+ *         // Get the response results, whatever it might be [array, object, string, integer]
+ *         const results = response.getResults();
+ *         if ( res.isUpdate() ) {
+ *             window.console.log('User updated!');
+ *         } else if ( res.isInsert() ) {
+ *             window.console.log('New user!');
+ *         }
+ *     });
+ */
 
 var CustomSuccess = function () {
     function CustomSuccess(result, operation) {
@@ -952,7 +966,7 @@ var VtexMasterdata = function VtexMasterdata(vtexUtils) {
    * Version
    * @type {String}
    */
-  this.version = '0.2.2';
+  this.version = '0.3.0';
 
   /**
    * Package name

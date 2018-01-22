@@ -1,6 +1,6 @@
 {
   "name": "vtex-masterdata",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Helpers to manipulate data from Vtex Masterdata",
   "main": "dist/vtex-masterdata.common.js",
   "module": "dist/vtex-masterdata.esm.js",
