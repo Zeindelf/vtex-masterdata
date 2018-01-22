@@ -10,10 +10,6 @@ export default {
      * @param {string} store - The current store
      */
     setStore(store) {
-        if ( typeof store !== 'string' || store.length === 0 ) {
-            throw new Error('Store name must be a string and not empty.');
-        }
-
         _private._setStore(store);
         _private._setHelpers(this.globalHelpers, this.vtexHelpers);
     },
@@ -35,7 +31,7 @@ export default {
      */
     newsletter(email, newsletter, entity) {
         const data = {
-            isNewsletterOptIn: newsletter === undefined ? true : newsletter,
+            isNewsletterOptIn: this.globalHelpers.isUndefined(newsletter) ? true : newsletter,
         };
 
         /* eslint-disable */
@@ -109,7 +105,7 @@ export default {
      * @param {string} [entity='CL'] - The Entity
      * @return {promise}
      * @example
-     *     vtexMasterData.updateUser('email@email.com', { isNewsletterOptIn: true, firstName: 'New firstname', lastName: 'new lastname'}).done((res) => {
+     *     vtexMasterData.updateUser('email@email.com', {isNewsletterOptIn: true, firstName: 'New firstname', lastName: 'new lastname'}).done((res) => {
      *         if ( res.isUpdate() ) {
      *             window.console.log(res.result);
      *         }
@@ -214,7 +210,7 @@ export default {
         return $.Deferred((def) => {
             /* eslint-enable */
             return _private._partialUpdate(id, data, entity).done((result) => {
-                def.resolve(_private._parseResult(result, (result.statusCode === 201) ? CONSTANTS.operations.OP_INSERT : CONSTANTS.operations.OP_UPDATE ));
+                def.resolve(_private._parseResult(result, (result.dataStatus === 201) ? CONSTANTS.operations.OP_INSERT : CONSTANTS.operations.OP_UPDATE ));
             }).fail((error) => {
                 def.reject(_private._parseError(error));
             });
@@ -222,10 +218,10 @@ export default {
     },
 
     /**
-     * Performs a search
+     * Performs a single search
      * @param {Object} params - The search parameters
      * @param {Array} fields - The Fields that will be retrieved
-     * @param {string} entity - The entity where the search will be performed
+     * @param {string} [entity='CL'] - The entity where the search will be performed
      * @param {int} [limit=49] - The search limit
      * @param {int} [offset=0] - The search offset
      * @return {promise}
@@ -235,6 +231,28 @@ export default {
         return $.Deferred((def) => {
             /* eslint-enable */
             return _private._search(params, fields, entity, limit, offset).done((result, textStatus, xhr) => {
+                def.resolve(_private._parseResult(_private._parseResponse(null, result, xhr.status), CONSTANTS.operations.OP_GET));
+            }).fail((error) => {
+                def.reject(_private._parseError(error));
+            });
+        }).promise();
+    },
+
+    /**
+     * Performs a full search with filters
+     * @param {Object} params - The search parameters
+     * @param {Array} fields - The Fields that will be retrieved
+     * @param {Object} filters - The filters params. Accept: _where, _keyword and _sort
+     * @param {string} [entity='CL'] - The entity where the search will be performed
+     * @param {int} [limit=49] - The search limit
+     * @param {int} [offset=0] - The search offset
+     * @return {promise}
+     */
+    fullSearch(params, fields, filters, entity, limit, offset) {
+        /* eslint-disable */
+        return $.Deferred((def) => {
+            /* eslint-enable */
+            return _private._fullSearch(params, fields, filters, entity, limit, offset).done((result, textStatus, xhr) => {
                 def.resolve(_private._parseResult(_private._parseResponse(null, result, xhr.status), CONSTANTS.operations.OP_GET));
             }).fail((error) => {
                 def.reject(_private._parseError(error));
@@ -254,7 +272,7 @@ export default {
         return $.Deferred((def) => {
             /* eslint-enable */
             return _private._get(id, fields, entity).done((result, textStatus, xhr) => {
-                def.resolve(_private._parseResult(_private._parseResponse(fields, result, xhr.status), CONSTANTS.operations.OP_GET));
+                def.resolve(_private._parseResult(_private._parseResponse(null, result, xhr.status), CONSTANTS.operations.OP_GET));
             }).fail((error) => {
                 def.reject(_private._parseError(error));
             });
@@ -276,8 +294,9 @@ export default {
             }, entity, CONSTANTS.types.DOCUMENTS).done((result, textStatus, xhr) => {
                 if ( result !== undefined && result.id !== undefined ) {
                     def.resolve(_private._parseResult(_private._parseResponse(null, {id: result.id, exists: true}, xhr.status), CONSTANTS.operations.OP_GET));
-                    def.resolve(_private._parseResult(result, CONSTANTS.operations.OP_GET));
-                } else def.reject(false);
+                } else {
+                    def.reject(false);
+                }
             }).fail((error) => {
                 def.reject(_private._parseError(error));
             });

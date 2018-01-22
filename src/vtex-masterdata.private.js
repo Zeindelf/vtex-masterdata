@@ -27,8 +27,10 @@ class Private {
      * @return {promise}
      */
     _get(id, fields, entity) {
-        const defaults = ['email', 'id'];
-        fields = fields instanceof Array ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults;
+        this._validateStoreName();
+
+        const defaults = ['id'];
+        fields = ( this._globalHelpers.isArray(fields) ) ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults;
         const data = {
             '_fields': fields.join(','),
         };
@@ -119,7 +121,7 @@ class Private {
     }
 
     /**
-     * Performs a search
+     * Performs a single search
      * @param {Object} params - The search parameters
      * @param {Array} fields - The fields that will be retrieved
      * @param {string} entity - The entity where the search will be performed
@@ -128,16 +130,21 @@ class Private {
      * @return {promise}
      */
     _search(params, fields, entity, limit, offset) {
-        limit = limit || 49;
-        offset = offset || 0;
+        return this._performSearch(params, fields, entity, limit, offset, null);
+    }
 
-        let headers = {
-            'REST-Range': 'resources=' + offset + '-' + (limit + offset),
-        };
-
-        params._fields = fields.join(',');
-
-        return this._call('get', null, params, entity, CONSTANTS.types.SEARCH, headers);
+    /**
+     * Performs a full search with filters
+     * @param {Object} params - The search parameters
+     * @param {Array} fields - The Fields that will be retrieved
+     * @param {Object} filters - The filters params. Accept: _where, _keyword and _sort
+     * @param {string} [entity='CL'] - The entity where the search will be performed
+     * @param {int} [limit=49] - The search limit
+     * @param {int} [offset=0] - The search offset
+     * @return {promise}
+     */
+    _fullSearch(params, fields, filters, entity, limit, offset) {
+        return this._performSearch(params, fields, entity, limit, offset, filters);
     }
 
     /**
@@ -153,21 +160,17 @@ class Private {
     }
 
     _getURL(entity, type, id) {
-        entity = entity !== undefined ? entity : CONSTANTS.DEFAULT_ENTITY;
+        this._validateStoreName();
 
-        if ( this._storeName === null ) {
-            throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
-        }
+        entity = ( ! this._globalHelpers.isUndefined(entity) ) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
         return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
     }
 
     _getAttachmentURL(entity, id, field) {
-        entity = entity !== undefined ? entity : CONSTANTS.DEFAULT_ENTITY;
+        this._validateStoreName();
 
-        if ( this._storeName === null ) {
-            throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
-        }
+        entity = ( !this._globalHelpers.isUndefined(entity) ) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
         return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, (id !== undefined && id !== null ? id : ''), field], CONSTANTS.API_ATTACHMENT_URL);
     }
@@ -179,7 +182,7 @@ class Private {
             accept: 'application/vnd.vtex.ds.v10+json',
             contentType: 'application/json; charset=utf-8',
             beforeSend(request) {
-                for (let header in headers) {
+                for ( let header in headers ) {
                     if ( {}.hasOwnProperty.call(headers, header) ) {
                         request.setRequestHeader(header, headers[header]);
                     }
@@ -203,6 +206,47 @@ class Private {
         });
     }
 
+    _performSearch(params, fields, entity, limit, offset, filters) {
+        this._validateStoreName();
+
+        limit = limit || 49;
+        offset = offset || 0;
+
+        const headers = {'REST-Range': 'resources=' + offset + '-' + (limit + offset)};
+        const defaults = ['id'];
+        fields = ( this._globalHelpers.isArray(fields) ) ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults;
+        params._fields = fields.join(',');
+
+        if ( this._globalHelpers.isObject(filters) ) {
+            if ( filters.hasOwnProperty('_where') ) {
+                params._where = filters._where;
+            }
+
+            if ( filters.hasOwnProperty('_keyword') ) {
+                params._keyword = filters._keyword;
+            }
+
+            if ( filters.hasOwnProperty('_sort') ) {
+                params._sort = filters._sort;
+            }
+        }
+
+        return this._call('get', null, params, entity, CONSTANTS.types.SEARCH, headers);
+    }
+
+    _validateStoreName() {
+        if ( this._storeName === null ) {
+            throw new Error(CONSTANTS.messages.storeName);
+        }
+    }
+
+    /**
+     * Parse response into object
+     * @param  {array} data   Contains element inserted
+     * @param  {array|object} result Contains AJAX Response
+     * @param  {integer} status Status code response
+     * @return {object}        Object with all values
+     */
     _parseResponse(data, result, status) {
         const obj = {
             dataInsert: data,

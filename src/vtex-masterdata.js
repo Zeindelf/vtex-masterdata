@@ -1,4 +1,5 @@
 
+import CONSTANTS from './vtex-masterdata.constants.js';
 import Methods from './vtex-masterdata.methods.js';
 
 /**
@@ -21,11 +22,15 @@ class VtexMasterdata {
 
         // Validate Vtex Utils
         if ( vtexUtils === undefined ) {
-            throw new Error('VtexUtils.js is required and must be an instance. Download it from https://www.npmjs.com/package/vtex-utils and use "new VtexMasterdata(new VtexUtils())"');
+            throw new TypeError(CONSTANTS.messages.vtexUtils);
         }
 
         if ( vtexUtils.name !== '@VtexUtils' ) {
-            throw new Error('VtexUtils must be an instance. Use "new VtexMasterdata(new VtexUtils())"');
+            throw new TypeError(CONSTANTS.messages.vtexUtils);
+        }
+
+        if ( vtexUtils.version < CONSTANTS.messages.vtexUtilsVersion ) {
+            throw new Error(CONSTANTS.messages.vtexUtilsVersionMessage);
         }
 
         /**

@@ -6,10 +6,12 @@
  * Copyright (c) 2017-2018 Zeindelf
  * Released under the MIT license
  *
- * Date: 2018-01-08T04:59:29.604Z
+ * Date: 2018-01-21T14:16:35.349Z
  */
 
 'use strict';
+
+var vtexUtilsVersion = '0.5.0';
 
 var CONSTANTS = {
     API_URL: '\/\/api.vtexcrm.com.br/{storeName}/dataentities/{entity}/{type}/',
@@ -31,6 +33,12 @@ var CONSTANTS = {
         OP_GET: 'get',
         OP_INSERT: 'insert',
         OP_UPDATE: 'update'
+    },
+    messages: {
+        vtexUtils: 'VtexUtils.js is required and must be an instance. Download it from https://www.npmjs.com/package/vtex-utils and use "new VtexMasterdata(new VtexUtils())"',
+        vtexUtilsVersion: vtexUtilsVersion,
+        vtexUtilsVersionMessage: 'VtexUtils version must be higher than ' + vtexUtilsVersion + '. Download last version on https://www.npmjs.com/package/vtex-utils',
+        storeName: 'Store name must be a string and not empty.'
     }
 };
 
@@ -73,20 +81,6 @@ var createClass = function () {
     return Constructor;
   };
 }();
-
-/**
- * CustomSuccess
- * @example
- *     vtexMasterdata.newsletter('email@email.com').done((res) => {
- *         // Get the response results, whatever it might be [array, object, string, integer]
- *         const results = response.getResults();
- *         if ( res.isUpdate() ) {
- *             window.console.log('User updated!');
- *         } else if ( res.isInsert() ) {
- *             window.console.log('New user!');
- *         }
- *     });
- */
 
 var CustomSuccess = function () {
     function CustomSuccess(result, operation) {
@@ -285,8 +279,10 @@ var Private = function () {
     }, {
         key: '_get',
         value: function _get(id, fields, entity) {
-            var defaults$$1 = ['email', 'id'];
-            fields = fields instanceof Array ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults$$1;
+            this._validateStoreName();
+
+            var defaults$$1 = ['id'];
+            fields = this._globalHelpers.isArray(fields) ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults$$1;
             var data = {
                 '_fields': fields.join(',')
             };
@@ -398,7 +394,7 @@ var Private = function () {
         }
 
         /**
-         * Performs a search
+         * Performs a single search
          * @param {Object} params - The search parameters
          * @param {Array} fields - The fields that will be retrieved
          * @param {string} entity - The entity where the search will be performed
@@ -410,16 +406,24 @@ var Private = function () {
     }, {
         key: '_search',
         value: function _search(params, fields, entity, limit, offset) {
-            limit = limit || 49;
-            offset = offset || 0;
+            return this._performSearch(params, fields, entity, limit, offset, null);
+        }
 
-            var headers = {
-                'REST-Range': 'resources=' + offset + '-' + (limit + offset)
-            };
+        /**
+         * Performs a full search with filters
+         * @param {Object} params - The search parameters
+         * @param {Array} fields - The Fields that will be retrieved
+         * @param {Object} filters - The filters params. Accept: _where, _keyword and _sort
+         * @param {string} [entity='CL'] - The entity where the search will be performed
+         * @param {int} [limit=49] - The search limit
+         * @param {int} [offset=0] - The search offset
+         * @return {promise}
+         */
 
-            params._fields = fields.join(',');
-
-            return this._call('get', null, params, entity, CONSTANTS.types.SEARCH, headers);
+    }, {
+        key: '_fullSearch',
+        value: function _fullSearch(params, fields, filters, entity, limit, offset) {
+            return this._performSearch(params, fields, entity, limit, offset, filters);
         }
 
         /**
@@ -439,22 +443,18 @@ var Private = function () {
     }, {
         key: '_getURL',
         value: function _getURL(entity, type, id) {
-            entity = entity !== undefined ? entity : CONSTANTS.DEFAULT_ENTITY;
+            this._validateStoreName();
 
-            if (this._storeName === null) {
-                throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
-            }
+            entity = !this._globalHelpers.isUndefined(entity) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
             return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
         }
     }, {
         key: '_getAttachmentURL',
         value: function _getAttachmentURL(entity, id, field) {
-            entity = entity !== undefined ? entity : CONSTANTS.DEFAULT_ENTITY;
+            this._validateStoreName();
 
-            if (this._storeName === null) {
-                throw new Error('Store name is not set, vtexMasterdata.setStore(storeName) must be called.');
-            }
+            entity = !this._globalHelpers.isUndefined(entity) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
             return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, id !== undefined && id !== null ? id : '', field], CONSTANTS.API_ATTACHMENT_URL);
         }
@@ -492,6 +492,51 @@ var Private = function () {
                 mimeType: 'multipart/form-data'
             });
         }
+    }, {
+        key: '_performSearch',
+        value: function _performSearch(params, fields, entity, limit, offset, filters) {
+            this._validateStoreName();
+
+            limit = limit || 49;
+            offset = offset || 0;
+
+            var headers = { 'REST-Range': 'resources=' + offset + '-' + (limit + offset) };
+            var defaults$$1 = ['id'];
+            fields = this._globalHelpers.isArray(fields) ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults$$1;
+            params._fields = fields.join(',');
+
+            if (this._globalHelpers.isObject(filters)) {
+                if (filters.hasOwnProperty('_where')) {
+                    params._where = filters._where;
+                }
+
+                if (filters.hasOwnProperty('_keyword')) {
+                    params._keyword = filters._keyword;
+                }
+
+                if (filters.hasOwnProperty('_sort')) {
+                    params._sort = filters._sort;
+                }
+            }
+
+            return this._call('get', null, params, entity, CONSTANTS.types.SEARCH, headers);
+        }
+    }, {
+        key: '_validateStoreName',
+        value: function _validateStoreName() {
+            if (this._storeName === null) {
+                throw new Error(CONSTANTS.messages.storeName);
+            }
+        }
+
+        /**
+         * Parse response into object
+         * @param  {array} data   Contains element inserted
+         * @param  {array|object} result Contains AJAX Response
+         * @param  {integer} status Status code response
+         * @return {object}        Object with all values
+         */
+
     }, {
         key: '_parseResponse',
         value: function _parseResponse(data, result, status) {
@@ -551,10 +596,6 @@ var Methods = {
      * @param {string} store - The current store
      */
     setStore: function setStore(store) {
-        if (typeof store !== 'string' || store.length === 0) {
-            throw new Error('Store name must be a string and not empty.');
-        }
-
         _private._setStore(store);
         _private._setHelpers(this.globalHelpers, this.vtexHelpers);
     },
@@ -579,7 +620,7 @@ var Methods = {
         var _this = this;
 
         var data = {
-            isNewsletterOptIn: _newsletter === undefined ? true : _newsletter
+            isNewsletterOptIn: this.globalHelpers.isUndefined(_newsletter) ? true : _newsletter
         };
 
         /* eslint-disable */
@@ -657,7 +698,7 @@ var Methods = {
      * @param {string} [entity='CL'] - The Entity
      * @return {promise}
      * @example
-     *     vtexMasterData.updateUser('email@email.com', { isNewsletterOptIn: true, firstName: 'New firstname', lastName: 'new lastname'}).done((res) => {
+     *     vtexMasterData.updateUser('email@email.com', {isNewsletterOptIn: true, firstName: 'New firstname', lastName: 'new lastname'}).done((res) => {
      *         if ( res.isUpdate() ) {
      *             window.console.log(res.result);
      *         }
@@ -769,7 +810,7 @@ var Methods = {
         return $.Deferred(function (def) {
             /* eslint-enable */
             return _private._partialUpdate(id, data, entity).done(function (result) {
-                def.resolve(_private._parseResult(result, result.statusCode === 201 ? CONSTANTS.operations.OP_INSERT : CONSTANTS.operations.OP_UPDATE));
+                def.resolve(_private._parseResult(result, result.dataStatus === 201 ? CONSTANTS.operations.OP_INSERT : CONSTANTS.operations.OP_UPDATE));
             }).fail(function (error) {
                 def.reject(_private._parseError(error));
             });
@@ -778,10 +819,10 @@ var Methods = {
 
 
     /**
-     * Performs a search
+     * Performs a single search
      * @param {Object} params - The search parameters
      * @param {Array} fields - The Fields that will be retrieved
-     * @param {string} entity - The entity where the search will be performed
+     * @param {string} [entity='CL'] - The entity where the search will be performed
      * @param {int} [limit=49] - The search limit
      * @param {int} [offset=0] - The search offset
      * @return {promise}
@@ -791,6 +832,29 @@ var Methods = {
         return $.Deferred(function (def) {
             /* eslint-enable */
             return _private._search(params, fields, entity, limit, offset).done(function (result, textStatus, xhr) {
+                def.resolve(_private._parseResult(_private._parseResponse(null, result, xhr.status), CONSTANTS.operations.OP_GET));
+            }).fail(function (error) {
+                def.reject(_private._parseError(error));
+            });
+        }).promise();
+    },
+
+
+    /**
+     * Performs a full search with filters
+     * @param {Object} params - The search parameters
+     * @param {Array} fields - The Fields that will be retrieved
+     * @param {Object} filters - The filters params. Accept: _where, _keyword and _sort
+     * @param {string} [entity='CL'] - The entity where the search will be performed
+     * @param {int} [limit=49] - The search limit
+     * @param {int} [offset=0] - The search offset
+     * @return {promise}
+     */
+    fullSearch: function fullSearch(params, fields, filters, entity, limit, offset) {
+        /* eslint-disable */
+        return $.Deferred(function (def) {
+            /* eslint-enable */
+            return _private._fullSearch(params, fields, filters, entity, limit, offset).done(function (result, textStatus, xhr) {
                 def.resolve(_private._parseResult(_private._parseResponse(null, result, xhr.status), CONSTANTS.operations.OP_GET));
             }).fail(function (error) {
                 def.reject(_private._parseError(error));
@@ -811,7 +875,7 @@ var Methods = {
         return $.Deferred(function (def) {
             /* eslint-enable */
             return _private._get(id, fields, entity).done(function (result, textStatus, xhr) {
-                def.resolve(_private._parseResult(_private._parseResponse(fields, result, xhr.status), CONSTANTS.operations.OP_GET));
+                def.resolve(_private._parseResult(_private._parseResponse(null, result, xhr.status), CONSTANTS.operations.OP_GET));
             }).fail(function (error) {
                 def.reject(_private._parseError(error));
             });
@@ -834,8 +898,9 @@ var Methods = {
             }, entity, CONSTANTS.types.DOCUMENTS).done(function (result, textStatus, xhr) {
                 if (result !== undefined && result.id !== undefined) {
                     def.resolve(_private._parseResult(_private._parseResponse(null, { id: result.id, exists: true }, xhr.status), CONSTANTS.operations.OP_GET));
-                    def.resolve(_private._parseResult(result, CONSTANTS.operations.OP_GET));
-                } else def.reject(false);
+                } else {
+                    def.reject(false);
+                }
             }).fail(function (error) {
                 def.reject(_private._parseError(error));
             });
@@ -893,11 +958,15 @@ var VtexMasterdata = function VtexMasterdata(vtexUtils) {
 
   // Validate Vtex Utils
   if (vtexUtils === undefined) {
-    throw new Error('VtexUtils.js is required and must be an instance. Download it from https://www.npmjs.com/package/vtex-utils and use "new VtexMasterdata(new VtexUtils())"');
+    throw new TypeError(CONSTANTS.messages.vtexUtils);
   }
 
   if (vtexUtils.name !== '@VtexUtils') {
-    throw new Error('VtexUtils must be an instance. Use "new VtexMasterdata(new VtexUtils())"');
+    throw new TypeError(CONSTANTS.messages.vtexUtils);
+  }
+
+  if (vtexUtils.version < CONSTANTS.messages.vtexUtilsVersion) {
+    throw new Error(CONSTANTS.messages.vtexUtilsVersionMessage);
   }
 
   /**

@@ -103,7 +103,7 @@ vtexMasterdata.newsletter('email@email.com', false)
         }
     })
     .fail(function(err) {
-        window.console.log(err)
+        window.console.log(err);
     });
 ```
 
@@ -135,15 +135,98 @@ vtexMasterdata.getUser('email@email.com', ['email', 'firstName', 'lastName'])
         window.console.log(res.result.dataResponse);
     })
     .fail(function(err) {
-        window.console.log(err)
+        window.console.log(err);
     });
 ```
 
-### vtexMasterdata.updateUser(email, data, entity)
+### vtexMasterdata.updateUser(email, data[, entity])
 
-### vtexMasterdata.insertUpdateUser(email, data, entity)
+Update User by email
 
-### vtexMasterdata.insert(data, entity)
+- **email**:
+  - Type: `String`
+  - The email of the user
+
+- **data**:
+  - Type: `Object`
+  - The data that will be updated.
+
+- **entity** (optional):
+  - Type: `String`
+  - Default: `'CL'`
+  - The Entity of the user
+
+#### Example
+
+Update user **newsletter opt in**, **firstName** and **lastName** (needs update properties set to public on Masterdata)
+
+```js
+vtexMasterData.updateUser('email@email.com', {isNewsletterOptIn: true, firstName: 'New firstname', lastName: 'new lastname'})
+    .done(function(res) {
+        if ( res.isUpdate() ) {
+            window.console.log(res.result);
+        }
+    })
+    .fail(function(err) {
+        window.console.log(err);
+    });
+```
+
+### vtexMasterdata.insertUpdateUser(email[, data[, entity]])
+
+Update a user if the email exists, or insert a new one if it doesn't
+
+- **email**:
+  - Type: `String`
+  - The email of the user
+
+- **data** (optional):
+  - Type: `Object`
+  - The data that will be updated.
+
+- **entity** (optional):
+  - Type: `String`
+  - Default: `'CL'`
+  - The Entity of the user
+
+#### Example
+
+Create new user by **email**
+
+```js
+vtexMasterdata.insertUpdateUser('new-user@email.com')
+    .then(function(res) {
+        window.console.log(res);
+    })
+    .fail(function(err) {
+        window.console.log(err);
+    });
+```
+
+Update **newsletter opt in** user by **email** (needs update properties set to public on Masterdata)
+
+```js
+vtexMasterdata.insertUpdateUser('new-user@email.com', {isNewsletterOptIn: true})
+    .then(function(res) {
+        window.console.log(res);
+    })
+    .fail(function(err) {
+        window.console.log(err);
+    });
+```
+
+### vtexMasterdata.insert(data[, entity])
+
+Insert a document
+
+- **data**:
+  - Type: `Object`
+  - The data that will be inserted
+
+- **entity** (optional):
+  - Type: `String`
+  - Default: `'CL'`
+  - The entity of the document to insert
 
 ### vtexMasterdata.insertUpdate(id, data, entity)
 
@@ -201,6 +284,8 @@ vtexMasterdata.search({}, ['latitute', 'longitude'], 'SO')
         window.console.log(err)
     });
 ```
+
+### vtexMasterdata.fullSearch(params, fields, [filters[, entity[, limit[, offset]]]])
 
 ### vtexMasterdata.get(id, fields, entity)
 
