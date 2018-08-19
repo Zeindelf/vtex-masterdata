@@ -7,7 +7,7 @@ class Private {
     constructor() {
         this._globalHelpers = null;
         this._vtexHelpers = null;
-        this._storeName = null;
+        this._storeName = this._vtexHelpers.getStoreName;
     }
 
     _setStore(store) {
@@ -235,7 +235,7 @@ class Private {
     }
 
     _validateStoreName() {
-        if ( this._storeName === null ) {
+        if ( this.globalHelpers.isUndefined(this._storeName) ) {
             throw new Error(CONSTANTS.messages.storeName);
         }
     }
