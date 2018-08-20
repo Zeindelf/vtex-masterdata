@@ -7,7 +7,7 @@ class Private {
     constructor() {
         this._globalHelpers = null;
         this._vtexHelpers = null;
-        this._storeName = this._vtexHelpers.getStoreName;
+        this._storeName = null;
     }
 
     _setStore(store) {
@@ -17,6 +17,7 @@ class Private {
     _setHelpers(globalHelpers, vtexHelpers) {
         this._globalHelpers = globalHelpers;
         this._vtexHelpers = vtexHelpers;
+        this._storeName = this._vtexHelpers.getStoreName;
     }
 
     /**
