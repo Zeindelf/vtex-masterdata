@@ -236,7 +236,7 @@ class Private {
     }
 
     _validateStoreName() {
-        if ( this.globalHelpers.isUndefined(this._storeName) ) {
+        if ( this._globalHelpers.isUndefined(this._storeName) ) {
             throw new Error(CONSTANTS.messages.storeName);
         }
     }
