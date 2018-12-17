@@ -17,7 +17,6 @@ class Private {
     _setHelpers(globalHelpers, vtexHelpers) {
         this._globalHelpers = globalHelpers;
         this._vtexHelpers = vtexHelpers;
-        this._storeName = this._vtexHelpers.getStoreName;
     }
 
     /**

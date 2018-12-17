@@ -1,12 +1,12 @@
 
 /*!!
- * VtexMasterdata.js v0.3.3
+ * VtexMasterdata.js v0.3.4
  * https://github.com/zeindelf/vtex-masterdata
  *
  * Copyright (c) 2017-2018 Zeindelf
  * Released under the MIT license
  *
- * Date: 2018-08-20T06:39:40.677Z
+ * Date: 2018-12-17T19:10:02.219Z
  */
 
 var vtexUtilsVersion = '0.5.0';
@@ -278,7 +278,6 @@ var Private = function () {
         value: function _setHelpers(globalHelpers, vtexHelpers) {
             this._globalHelpers = globalHelpers;
             this._vtexHelpers = vtexHelpers;
-            this._storeName = this._vtexHelpers.getStoreName;
         }
 
         /**
@@ -961,7 +960,7 @@ var VtexMasterdata = function VtexMasterdata(vtexUtils) {
    * Version
    * @type {String}
    */
-  this.version = '0.3.3';
+  this.version = '0.3.4';
 
   /**
    * Package name
