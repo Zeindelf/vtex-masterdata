@@ -7,16 +7,11 @@ class Private {
     constructor() {
         this._globalHelpers = null;
         this._vtexHelpers = null;
-        this._storeName = null;
     }
 
-    _setStore(store) {
-        this._storeName = store;
-    }
-
-    _setHelpers(globalHelpers, vtexHelpers) {
-        this._globalHelpers = globalHelpers;
-        this._vtexHelpers = vtexHelpers;
+    _getInstance(vtexUtils) {
+        this._globalHelpers = vtexUtils.globalHelpers;
+        this._vtexHelpers = vtexUtils.vtexHelpers;
     }
 
     /**
@@ -27,8 +22,6 @@ class Private {
      * @return {promise}
      */
     _get(id, fields, entity) {
-        this._validateStoreName();
-
         const defaults = ['id'];
         fields = ( this._globalHelpers.isArray(fields) ) ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults;
         const data = {
@@ -160,19 +153,15 @@ class Private {
     }
 
     _getURL(entity, type, id) {
-        this._validateStoreName();
-
         entity = ( ! this._globalHelpers.isUndefined(entity) ) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
-        return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
+        return this._globalHelpers.strReplace(['{entity}', '{type}'], [entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
     }
 
     _getAttachmentURL(entity, id, field) {
-        this._validateStoreName();
-
         entity = ( !this._globalHelpers.isUndefined(entity) ) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
-        return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, (id !== undefined && id !== null ? id : ''), field], CONSTANTS.API_ATTACHMENT_URL);
+        return this._globalHelpers.strReplace(['{entity}', '{id}', '{field}'], [entity, (id !== undefined && id !== null ? id : ''), field], CONSTANTS.API_ATTACHMENT_URL);
     }
 
     _call(method, id, data, entity, type, headers) {
@@ -207,8 +196,6 @@ class Private {
     }
 
     _performSearch(params, fields, entity, limit, offset, filters) {
-        this._validateStoreName();
-
         limit = limit || 49;
         offset = offset || 0;
 
@@ -234,11 +221,11 @@ class Private {
         return this._call('get', null, params, entity, CONSTANTS.types.SEARCH, headers);
     }
 
-    _validateStoreName() {
-        if ( this._globalHelpers.isUndefined(this._storeName) ) {
-            throw new Error(CONSTANTS.messages.storeName);
-        }
-    }
+    // _validateStoreName() {
+    //     if ( this._globalHelpers.isUndefined(this._storeName) ) {
+    //         throw new Error(CONSTANTS.messages.storeName);
+    //     }
+    // }
 
     /**
      * Parse response into object

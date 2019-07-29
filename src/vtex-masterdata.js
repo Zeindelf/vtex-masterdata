@@ -49,6 +49,12 @@ class VtexMasterdata {
          * Extend public methods
          */
         this.globalHelpers.extend(VtexMasterdata.prototype, Methods);
+
+        /**
+         * Sets instance for private Methods
+         * @type {Method}
+         */
+        this._setInstance(vtexUtils);
     }
 }
 

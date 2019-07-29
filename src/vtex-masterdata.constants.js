@@ -2,8 +2,8 @@
 const vtexUtilsVersion = '0.5.0';
 
 export default {
-    API_URL: '\/\/api.vtexcrm.com.br/{storeName}/dataentities/{entity}/{type}/',
-    API_ATTACHMENT_URL: '\/\/api.vtexcrm.com.br/{storeName}/dataentities/{entity}/documents/{id}/{field}/attachments',
+    API_URL: '/api/dataentities/{entity}/{type}/',
+    API_ATTACHMENT_URL: '/api/dataentities/{entity}/documents/{id}/{field}/attachments',
     DEFAULT_ENTITY: 'CL',
     error: {
         ERR_INVALID_USER: 'User doesn\'t exist',

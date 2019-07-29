@@ -3,10 +3,10 @@
  * VtexMasterdata.js v0.3.4
  * https://github.com/zeindelf/vtex-masterdata
  *
- * Copyright (c) 2017-2018 Zeindelf
+ * Copyright (c) 2017-2019 Zeindelf
  * Released under the MIT license
  *
- * Date: 2018-12-17T19:10:02.219Z
+ * Date: 2019-07-29T04:10:49.359Z
  */
 
 (function (global, factory) {
@@ -18,8 +18,8 @@
 var vtexUtilsVersion = '0.5.0';
 
 var CONSTANTS = {
-    API_URL: '\/\/api.vtexcrm.com.br/{storeName}/dataentities/{entity}/{type}/',
-    API_ATTACHMENT_URL: '\/\/api.vtexcrm.com.br/{storeName}/dataentities/{entity}/documents/{id}/{field}/attachments',
+    API_URL: '/api/dataentities/{entity}/{type}/',
+    API_ATTACHMENT_URL: '/api/dataentities/{entity}/documents/{id}/{field}/attachments',
     DEFAULT_ENTITY: 'CL',
     error: {
         ERR_INVALID_USER: 'User doesn\'t exist',
@@ -85,20 +85,6 @@ var createClass = function () {
     return Constructor;
   };
 }();
-
-/**
- * CustomSuccess
- * @example
- *     vtexMasterdata.newsletter('email@email.com').done((res) => {
- *         // Get the response results, whatever it might be [array, object, string, integer]
- *         const results = response.getResults();
- *         if ( res.isUpdate() ) {
- *             window.console.log('User updated!');
- *         } else if ( res.isInsert() ) {
- *             window.console.log('New user!');
- *         }
- *     });
- */
 
 var CustomSuccess = function () {
     function CustomSuccess(result, operation) {
@@ -271,19 +257,13 @@ var Private = function () {
 
         this._globalHelpers = null;
         this._vtexHelpers = null;
-        this._storeName = null;
     }
 
     createClass(Private, [{
-        key: '_setStore',
-        value: function _setStore(store) {
-            this._storeName = store;
-        }
-    }, {
-        key: '_setHelpers',
-        value: function _setHelpers(globalHelpers, vtexHelpers) {
-            this._globalHelpers = globalHelpers;
-            this._vtexHelpers = vtexHelpers;
+        key: '_getInstance',
+        value: function _getInstance(vtexUtils) {
+            this._globalHelpers = vtexUtils.globalHelpers;
+            this._vtexHelpers = vtexUtils.vtexHelpers;
         }
 
         /**
@@ -297,8 +277,6 @@ var Private = function () {
     }, {
         key: '_get',
         value: function _get(id, fields, entity) {
-            this._validateStoreName();
-
             var defaults$$1 = ['id'];
             fields = this._globalHelpers.isArray(fields) ? this._globalHelpers.arrayUnique(fields.concat(['id'])) : defaults$$1;
             var data = {
@@ -461,20 +439,16 @@ var Private = function () {
     }, {
         key: '_getURL',
         value: function _getURL(entity, type, id) {
-            this._validateStoreName();
-
             entity = !this._globalHelpers.isUndefined(entity) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
-            return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{type}'], [this._storeName, entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
+            return this._globalHelpers.strReplace(['{entity}', '{type}'], [entity, type], CONSTANTS.API_URL) + (id !== undefined && id !== null ? id : '');
         }
     }, {
         key: '_getAttachmentURL',
         value: function _getAttachmentURL(entity, id, field) {
-            this._validateStoreName();
-
             entity = !this._globalHelpers.isUndefined(entity) ? entity : CONSTANTS.DEFAULT_ENTITY;
 
-            return this._globalHelpers.strReplace(['{storeName}', '{entity}', '{id}', '{field}'], [this._storeName, entity, id !== undefined && id !== null ? id : '', field], CONSTANTS.API_ATTACHMENT_URL);
+            return this._globalHelpers.strReplace(['{entity}', '{id}', '{field}'], [entity, id !== undefined && id !== null ? id : '', field], CONSTANTS.API_ATTACHMENT_URL);
         }
     }, {
         key: '_call',
@@ -513,8 +487,6 @@ var Private = function () {
     }, {
         key: '_performSearch',
         value: function _performSearch(params, fields, entity, limit, offset, filters) {
-            this._validateStoreName();
-
             limit = limit || 49;
             offset = offset || 0;
 
@@ -539,13 +511,12 @@ var Private = function () {
 
             return this._call('get', null, params, entity, CONSTANTS.types.SEARCH, headers);
         }
-    }, {
-        key: '_validateStoreName',
-        value: function _validateStoreName() {
-            if (this._globalHelpers.isUndefined(this._storeName)) {
-                throw new Error(CONSTANTS.messages.storeName);
-            }
-        }
+
+        // _validateStoreName() {
+        //     if ( this._globalHelpers.isUndefined(this._storeName) ) {
+        //         throw new Error(CONSTANTS.messages.storeName);
+        //     }
+        // }
 
         /**
          * Parse response into object
@@ -610,12 +581,20 @@ var _private = new Private();
 
 var Methods = {
     /**
+     * Sets Catalog instance
+     * @return {Void}
+     */
+    _setInstance: function _setInstance(vtexUtils) {
+        _private._getInstance(vtexUtils);
+    },
+
+
+    /**
      * Set the current Store
      * @param {string} store - The current store
      */
-    setStore: function setStore(store) {
-        _private._setStore(store);
-        _private._setHelpers(this.globalHelpers, this.vtexHelpers);
+    setStore: function setStore() {
+        console.warn('VtexMasterdata: setStore() is a deprecated method. Please, remove its call');
     },
 
 
@@ -954,11 +933,6 @@ var Methods = {
     }
 };
 
-/**
- * Create a VtexMasterdata class
- * Main class
- */
-
 var VtexMasterdata = function VtexMasterdata(vtexUtils) {
   classCallCheck(this, VtexMasterdata);
 
@@ -1003,6 +977,12 @@ var VtexMasterdata = function VtexMasterdata(vtexUtils) {
    * Extend public methods
    */
   this.globalHelpers.extend(VtexMasterdata.prototype, Methods);
+
+  /**
+   * Sets instance for private Methods
+   * @type {Method}
+   */
+  this._setInstance(vtexUtils);
 };
 
 return VtexMasterdata;

@@ -6,12 +6,19 @@ const _private = new Private();
 
 export default {
     /**
+     * Sets Catalog instance
+     * @return {Void}
+     */
+    _setInstance(vtexUtils) {
+        _private._getInstance(vtexUtils);
+    },
+
+    /**
      * Set the current Store
      * @param {string} store - The current store
      */
-    setStore(store) {
-        _private._setStore(store);
-        _private._setHelpers(this.globalHelpers, this.vtexHelpers);
+    setStore() {
+        console.warn('VtexMasterdata: setStore() is a deprecated method. Please, remove its call');
     },
 
     /**
