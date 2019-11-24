@@ -1,17 +1,17 @@
 {
   "name": "vtex-masterdata",
-  "version": "0.4.0",
+  "version": "1.0.0-beta.0",
   "description": "Helpers to manipulate data from Vtex Masterdata",
-  "main": "dist/vtex-masterdata.common.js",
-  "module": "dist/vtex-masterdata.esm.js",
+  "module": "es/index.js",
+  "main": "src/index",
   "browser": "dist/vtex-masterdata.js",
   "scripts": {
-    "build": "rollup -c",
-    "clear": "del-cli dist",
-    "compress": "uglifyjs dist/vtex-masterdata.js -o dist/vtex-masterdata.min.js -c -m --comments /^!!/",
-    "lint": "eslint src --fix",
-    "release": "npm run clear && npm run lint && npm run build && npm run compress",
-    "start": "./node_modules/.bin/rollup -c --watch"
+    "build:es": "cross-env BABEL_ENV=es babel lib --out-dir es",
+    "build:cjs": "cross-env BABEL_ENV=cjs babel lib --out-dir src",
+    "build": "npm run build:es && npm run build:cjs",
+    "clean": "rimraf es/* src/* dist/* coverage/*",
+    "lint": "eslint lib/**/*.{js,ts} --fix --color",
+    "prepare": "npm run clean && npm run build"
   },
   "repository": "zeindelf/vtex-masterdata",
   "homepage": "https://github.com/zeindelf/vtex-masterdata",
@@ -22,9 +22,9 @@
     "homepage": "https://www.zeindelf.com"
   },
   "files": [
-    "dist",
-    "doc",
-    "lib"
+    "es",
+    "src",
+    "dist"
   ],
   "keywords": [
     "vtex",
@@ -46,19 +46,28 @@
     "development"
   ],
   "dependencies": {
-    "babel": "^6.23.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.1.2",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-env": "^1.6.1",
-    "del-cli": "^1.1.0",
-    "eslint": "^4.13.1",
-    "eslint-config-google": "^0.9.1",
-    "eslint-plugin-import": "^2.8.0",
-    "npm-run-all": "^4.1.2",
-    "rollup": "^0.53.0",
-    "rollup-plugin-babel": "^3.0.3",
-    "rollup-watch": "^4.3.1",
-    "uglify-js": "^3.2.2"
+    "eslint-config-airbnb-base": "^14.0.0",
+    "querystring": "^0.2.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/register": "^7.4.4",
+    "@babel/types": "^7.4.4",
+    "@commitlint/cli": "^8.2.0",
+    "@commitlint/config-conventional": "^8.2.0",
+    "babel-plugin-annotate-pure-calls": "^0.4.0",
+    "babel-plugin-import-export-rename": "^1.0.1",
+    "babelify": "^10.0.0",
+    "cli-table": "0.3.x",
+    "cross-env": "^5.2.0",
+    "envvar": "^2.0.0",
+    "eslint": "^6.7.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-promise": "^4.2.1",
+    "husky": "^3.1.0",
+    "lint-staged": "^9.4.3",
+    "rimraf": "^2.6.3"
   }
 }
