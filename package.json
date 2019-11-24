@@ -1,6 +1,6 @@
 {
   "name": "vtex-masterdata",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "description": "Helpers to manipulate data from Vtex Masterdata",
   "module": "es/index.js",
   "main": "src/index",
@@ -11,7 +11,8 @@
     "build": "npm run build:es && npm run build:cjs",
     "clean": "rimraf es/* src/* dist/* coverage/*",
     "lint": "eslint lib/**/*.{js,ts} --fix --color",
-    "prepare": "npm run clean && npm run build"
+    "prepare": "npm run clean && npm run build",
+    "release": "npm run clean && npm run build"
   },
   "repository": "zeindelf/vtex-masterdata",
   "homepage": "https://github.com/zeindelf/vtex-masterdata",
